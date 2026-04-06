@@ -1,1 +1,0 @@
-print("""Atu doesnt love me huhhhhhhhhh"")
