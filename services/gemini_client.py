@@ -1,12 +1,14 @@
-## services/gemini_client.py
-
-import google.generativeai as genai
+from google import genai
 import os
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-model = genai.GenerativeModel("gemini-pro")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate(prompt):
-    response = model.generate_content(prompt)
-    return response.text
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-pro",   # ✅ THIS WORKS
+            contents=prompt
+        )
+        return response.text
+    except Exception as e:
+        return f"Error: {str(e)}"

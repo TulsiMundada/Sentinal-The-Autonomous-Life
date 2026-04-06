@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from agents.orchestrator import run_full_cycle
 from agents.planner import planner_agent
 from agents.scheduler import scheduler_agent
 from agents.reflection import reflection_agent
 from agents.executor import execution_agent
+from db.storage import get_recent_logs
+
+
 
 app = FastAPI(title="Life Debugger AI 🚀")
 
@@ -24,9 +28,16 @@ class ReflectRequest(BaseModel):
 class ExecuteRequest(BaseModel):
     task: str
 
+class FullCycleRequest(BaseModel):
+    goal: str
+    time: str
+
 # ------------------------
 # Routes
 # ------------------------
+@app.get("/logs")
+def logs():
+    return {"logs": get_recent_logs()}
 
 @app.get("/")
 def home():
@@ -51,3 +62,8 @@ def reflect(request: ReflectRequest):
 def execute(request: ExecuteRequest):
     result = execution_agent(request.task)
     return {"execution": result}
+
+@app.post("/run")
+def run(request: FullCycleRequest):
+    result = run_full_cycle(request.goal, request.time)
+    return result
