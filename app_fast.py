@@ -6,14 +6,12 @@ from agents.scheduler import scheduler_agent
 from agents.reflection import reflection_agent
 from agents.executor import execution_agent
 from db.storage import get_recent_logs
-
+from fastapi.responses import HTMLResponse
 
 
 app = FastAPI(title="Life Debugger AI 🚀")
 
-# ------------------------
 # Request Models
-# ------------------------
 
 class PlanRequest(BaseModel):
     goal: str
@@ -67,3 +65,20 @@ def execute(request: ExecuteRequest):
 def run(request: FullCycleRequest):
     result = run_full_cycle(request.goal, request.time)
     return result
+
+
+
+@app.get("/ui", response_class=HTMLResponse)
+def ui():
+    return """
+    <html>
+    <body>
+        <h1>Sentinal AI 🚀</h1>
+        <form action="/run" method="post">
+            <input name="goal" placeholder="Goal"><br>
+            <input name="time" placeholder="Time"><br>
+            <button type="submit">Run</button>
+        </form>
+    </body>
+    </html>
+    """

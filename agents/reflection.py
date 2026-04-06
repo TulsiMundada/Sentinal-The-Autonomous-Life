@@ -2,7 +2,8 @@
 
 from services.gemini_client import generate
 
-prompt = f"""
+def reflection_agent(logs):
+    prompt = f"""
 You are a performance analyst.
 
 Analyze the following productivity logs:
@@ -13,9 +14,4 @@ Give:
 - Wasted time patterns
 - Improvement suggestions
 """
-
-def reflection_agent(logs):
-    try:
-        return generate(prompt)
-    except:
-        return "Reflection: You tend to lose time in passive scrolling. Replace with structured habits."
+    return generate(prompt)
