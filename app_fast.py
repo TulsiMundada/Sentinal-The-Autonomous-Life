@@ -1,17 +1,19 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Form
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+
 from agents.orchestrator import run_full_cycle
 from agents.planner import planner_agent
 from agents.scheduler import scheduler_agent
 from agents.reflection import reflection_agent
 from agents.executor import execution_agent
 from db.storage import get_recent_logs
-from fastapi.responses import HTMLResponse
 
+app = FastAPI(title="Sentinal - Autonomous Life 🚀")
 
-app = FastAPI(title="Life Debugger AI 🚀")
-
-# Request Models
+# ------------------------
+# Request Models (API use)
+# ------------------------
 
 class PlanRequest(BaseModel):
     goal: str
@@ -30,55 +32,105 @@ class FullCycleRequest(BaseModel):
     goal: str
     time: str
 
-# ------------------------
-# Routes
-# ------------------------
-@app.get("/logs")
-def logs():
-    return {"logs": get_recent_logs()}
 
-@app.get("/")
+# ------------------------
+# HTML UI (MAIN PAGE)
+# ------------------------
+
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return {"status": "Life Debugger AI Running 🚀"}
+    return """
+    <html>
+        <head>
+            <title>Sentinal AI</title>
+        </head>
+        <body style="font-family: Arial; padding: 30px;">
+            <h1>🧠 Sentinal - Autonomous Life</h1>
+            <h3>🚫 Doomscrolling → 🎯 Productivity Converter</h3>
 
-@app.post("/plan")
-def plan(request: PlanRequest):
-    result = planner_agent(request.goal)
-    return {"plan": result}
+            <form action="/run-ui" method="post">
+                <label><b>Goal:</b></label><br>
+                <input type="text" name="goal" style="width:400px;" placeholder="e.g. scrolling reels for 3 hours"><br><br>
 
-@app.post("/schedule")
-def schedule(request: ScheduleRequest):
-    result = scheduler_agent(request.tasks, request.time)
-    return {"schedule": result}
+                <label><b>Available Time:</b></label><br>
+                <input type="text" name="time" value="2 hours"><br><br>
 
-@app.post("/reflect")
-def reflect(request: ReflectRequest):
-    result = reflection_agent(request.logs)
-    return {"reflection": result}
+                <button type="submit">🚀 Run AI Agents</button>
+            </form>
 
-@app.post("/execute")
-def execute(request: ExecuteRequest):
-    result = execution_agent(request.task)
-    return {"execution": result}
+            <br><br>
+            <a href="/logs">📜 View Logs</a>
+        </body>
+    </html>
+    """
+
+
+# ------------------------
+# UI FORM HANDLER
+# ------------------------
+
+@app.post("/run-ui", response_class=HTMLResponse)
+def run_ui(goal: str = Form(...), time: str = Form(...)):
+    result = run_full_cycle(goal, time)
+
+    data = result.get("data", result)
+
+    return f"""
+    <html>
+        <body style="font-family: Arial; padding: 30px;">
+            <h1>✅ Result</h1>
+
+            <h3>🎯 Goal</h3>
+            <p>{data.get("goal")}</p>
+
+            <h3>🧩 Plan</h3>
+            <pre>{data.get("plan")}</pre>
+
+            <h3>📅 Schedule</h3>
+            <pre>{data.get("schedule")}</pre>
+
+            <h3>⚡ Execution</h3>
+            <pre>{data.get("execution")}</pre>
+
+            <h3>🧠 Reflection</h3>
+            <pre>{data.get("reflection")}</pre>
+
+            <br><br>
+            <a href="/">⬅️ Go Back</a>
+        </body>
+    </html>
+    """
+
+
+# ------------------------
+# API ROUTES (for testing)
+# ------------------------
 
 @app.post("/run")
 def run(request: FullCycleRequest):
-    result = run_full_cycle(request.goal, request.time)
-    return result
+    return run_full_cycle(request.goal, request.time)
 
 
+@app.post("/plan")
+def plan(request: PlanRequest):
+    return {"plan": planner_agent(request.goal)}
 
-@app.get("/ui", response_class=HTMLResponse)
-def ui():
-    return """
-    <html>
-    <body>
-        <h1>Sentinal AI 🚀</h1>
-        <form action="/run" method="post">
-            <input name="goal" placeholder="Goal"><br>
-            <input name="time" placeholder="Time"><br>
-            <button type="submit">Run</button>
-        </form>
-    </body>
-    </html>
-    """
+
+@app.post("/schedule")
+def schedule(request: ScheduleRequest):
+    return {"schedule": scheduler_agent(request.tasks, request.time)}
+
+
+@app.post("/reflect")
+def reflect(request: ReflectRequest):
+    return {"reflection": reflection_agent(request.logs)}
+
+
+@app.post("/execute")
+def execute(request: ExecuteRequest):
+    return {"execution": execution_agent(request.task)}
+
+
+@app.get("/logs")
+def logs():
+    return {"logs": get_recent_logs()}
