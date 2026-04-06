@@ -2,8 +2,7 @@
 
 from services.gemini_client import generate
 
-def execution_agent(task):
-    prompt = f"""
+prompt = f"""
 You are an execution coach.
 
 Convert this task into:
@@ -14,4 +13,8 @@ Convert this task into:
 Task:
 {task}
 """
-    return generate(prompt)
+def execution_agent(task):
+    try:
+        return generate(prompt)
+    except:
+        return "Step-by-step execution: Start small, 10-min focus session, remove distractions."

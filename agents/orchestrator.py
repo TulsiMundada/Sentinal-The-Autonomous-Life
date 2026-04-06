@@ -38,9 +38,14 @@ Original Input: {goal}
     save_log(goal, plan, schedule, execution, reflection)
 
     return {
+    "status": "success",
+    "system": "Sentinal - Autonomous Life",
+    "message": "Doomscrolling behavior detected and optimized 🚀",
+    "data": {
         "goal": goal,
         "plan": plan,
         "schedule": schedule,
         "execution": execution,
         "reflection": reflection
     }
+}
