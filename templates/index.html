@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinal — The Autonomous Life</title>
+<style>
+  :root {
+    --bg:      #0a0a0f;
+    --surface: #13131a;
+    --card:    #1a1a24;
+    --border:  #2a2a3a;
+    --accent:  #7c3aed;
+    --accent2: #06b6d4;
+    --green:   #22c55e;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
+    --radius:  14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  /* ── Hero ── */
+  .hero { text-align: center; margin-bottom: 2.5rem; }
+  .logo {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .tagline {
+    margin-top: .6rem;
+    color: var(--muted);
+    font-size: 1rem;
+    letter-spacing: .5px;
+  }
+  .badge {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: .3rem .85rem;
+    border-radius: 99px;
+    border: 1px solid var(--accent);
+    color: #a78bfa;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* ── Form ── */
+  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .45rem; font-weight: 500; }
+  textarea, input, select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: .75rem 1rem;
+    font-size: .95rem;
+    font-family: inherit;
+    transition: border-color .2s;
+    outline: none;
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  textarea:focus, input:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--card); }
+
+  .field { margin-bottom: 1.25rem; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* ── Button ── */
+  button[type="submit"] {
+    width: 100%;
+    padding: .9rem;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .5px;
+    transition: opacity .2s, transform .1s;
+    margin-top: .5rem;
+  }
+  button[type="submit"]:hover  { opacity: .9; }
+  button[type="submit"]:active { transform: scale(.99); }
+
+  /* ── Agents strip ── */
+  .agents {
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin: 2rem 0 1.5rem;
+  }
+  .agent-chip {
+    padding: .35rem .85rem;
+    border-radius: 99px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    font-size: .78rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .agent-chip span { margin-right: .3rem; }
+
+  /* ── Loading overlay ── */
+  #loading {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,10,15,.85);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #loading.active { display: flex; }
+  .spinner {
+    width: 52px; height: 52px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: .9rem; }
+
+  /* ── Footer ── */
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: .78rem; text-align: center; }
+  footer a { color: var(--muted); text-decoration: none; }
+
+  /* ── Logs link ── */
+  .nav { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1.8rem; }
+  .nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .85rem;
+    transition: color .2s;
+    display: flex; align-items: center; gap: .3rem;
+  }
+  .nav a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-text" id="loading-msg">Coordinating agents…</p>
+</div>
+
+<div class="hero">
+  <div class="logo">Sentinal</div>
+  <p class="tagline">The Autonomous Life — multi-agent behavioral AI</p>
+  <span class="badge">🤖 4 Agents · 1 LLM Call · Always-On Fallback</span>
+</div>
+
+<nav class="nav">
+  <a href="/">🏠 Home</a>
+  <a href="/logs">📜 Past Sessions</a>
+</nav>
+
+<div class="card">
+  <form method="post" action="/run-ui" id="mainForm">
+    <div class="field">
+      <label>What have you been doing? (be honest 😅)</label>
+      <textarea name="goal" placeholder="e.g. I spent 4 hours scrolling Instagram reels and feel terrible about it…" required></textarea>
+    </div>
+    <div class="field">
+      <label>How much time do you have right now?</label>
+      <select name="available_time">
+        <option value="30 minutes">30 minutes</option>
+        <option value="1 hour" selected>1 hour</option>
+        <option value="2 hours">2 hours</option>
+        <option value="3 hours">3 hours</option>
+        <option value="Half a day">Half a day</option>
+      </select>
+    </div>
+    <button type="submit">🚀 Run Sentinal Agents</button>
+  </form>
+</div>
+
+<div class="agents">
+  <div class="agent-chip"><span>🧩</span>Planner</div>
+  <div class="agent-chip"><span>📅</span>Scheduler</div>
+  <div class="agent-chip"><span>⚡</span>Executor</div>
+  <div class="agent-chip"><span>🧠</span>Reflection</div>
+  <div class="agent-chip"><span>🛠️</span>MCP Tools</div>
+</div>
+
+<footer>
+  Sentinal v2.0 · Built with FastAPI + Gemini + SQLite<br>
+  <a href="/docs">API Docs</a> · <a href="/logs">Logs</a>
+</footer>
+
+<script>
+  const loadingMessages = [
+    "Detecting behavioral patterns…",
+    "Coordinating 4 AI agents…",
+    "Building your personalized plan…",
+    "Scheduling time blocks…",
+    "Running MCP tools…",
+    "Almost ready…",
+  ];
+  let msgIdx = 0;
+  const msgEl = document.getElementById("loading-msg");
+  const loading = document.getElementById("loading");
+
+  document.getElementById("mainForm").addEventListener("submit", () => {
+    loading.classList.add("active");
+    setInterval(() => {
+      msgIdx = (msgIdx + 1) % loadingMessages.length;
+      msgEl.textContent = loadingMessages[msgIdx];
+    }, 1800);
+  });
+</script>
+</body>
+</html>

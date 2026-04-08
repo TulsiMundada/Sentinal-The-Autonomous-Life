@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinal — Your Plan</title>
+<style>
+  :root {
+    --bg:        #0a0a0f;
+    --surface:   #13131a;
+    --card:      #1a1a24;
+    --border:    #2a2a3a;
+    --accent:    #7c3aed;
+    --accent2:   #06b6d4;
+    --green:     #22c55e;
+    --amber:     #f59e0b;
+    --red:       #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --radius:    14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 2rem 1rem;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+  .logo-sm {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .85rem;
+    margin-left: 1.2rem;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── Status banner ── */
+  .banner {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    padding: .9rem 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .9rem;
+  }
+  .banner.success { background: #052e16; border-color: #166534; color: #86efac; }
+  .banner.fallback { background: #431407; border-color: #9a3412; color: #fdba74; }
+
+  /* ── Doom Score Hero ── */
+  .doom-hero {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .score-ring {
+    width: 88px;
+    height: 88px;
+    position: relative;
+  }
+  .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .score-ring .track { fill: none; stroke: var(--card); stroke-width: 7; }
+  .score-ring .fill  { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+  .score-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .score-label { font-size: .55rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .doom-info h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: .35rem; }
+  .doom-info p  { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+  .doom-type {
+    padding: .35rem .85rem;
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .full { grid-column: 1 / -1; }
+
+  /* ── Section card ── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .section-header {
+    padding: .85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 700;
+    font-size: .9rem;
+    background: var(--card);
+  }
+  .section-header .icon { font-size: 1.1rem; }
+  .section-body { padding: 1.25rem; }
+
+  /* ── Motivation ── */
+  .motivation {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #a5b4fc;
+    font-style: italic;
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+  }
+
+  /* ── Engagement menu ── */
+  .menu-item {
+    padding: .55rem .9rem;
+    background: var(--card);
+    border-radius: 8px;
+    font-size: .88rem;
+    margin-bottom: .5rem;
+    border: 1px solid var(--border);
+    cursor: default;
+    transition: border-color .2s;
+  }
+  .menu-item:hover { border-color: var(--accent); }
+
+  /* ── Tasks ── */
+  .task {
+    padding: .75rem 1rem;
+    background: var(--card);
+    border-radius: 10px;
+    margin-bottom: .65rem;
+    border-left: 3px solid var(--border);
+    transition: border-color .2s;
+  }
+  .task:hover { border-left-color: var(--accent); }
+  .task-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; gap: .5rem; }
+  .task-title { font-weight: 600; font-size: .92rem; }
+  .task-meta  { color: var(--muted); font-size: .8rem; margin-top: .2rem; }
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .6rem;
+    border-radius: 99px;
+    font-size: .7rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .p-high   { background: #450a0a; color: #fca5a5; }
+  .p-medium { background: #431407; color: #fdba74; }
+  .p-low    { background: #052e16; color: #86efac; }
+  .cat-chip { background: var(--border); color: var(--muted); }
+
+  /* ── Schedule timeline ── */
+  .timeline { position: relative; padding-left: 1.5rem; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: .45rem;
+    top: .4rem;
+    bottom: .4rem;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+    border-radius: 2px;
+  }
+  .slot {
+    position: relative;
+    margin-bottom: .9rem;
+  }
+  .slot::before {
+    content: '';
+    position: absolute;
+    left: -1.18rem;
+    top: .55rem;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+  .slot-time   { font-size: .75rem; color: var(--muted); margin-bottom: .15rem; }
+  .slot-act    { font-size: .9rem; font-weight: 600; }
+  .slot-dur    { font-size: .78rem; color: var(--muted); }
+  .slot-type-focus    { border-left: 2px solid var(--accent); padding-left: .5rem; }
+  .slot-type-break    { border-left: 2px solid var(--green);  padding-left: .5rem; }
+  .slot-type-review   { border-left: 2px solid var(--amber);  padding-left: .5rem; }
+  .slot-type-exercise { border-left: 2px solid #f97316;       padding-left: .5rem; }
+  .slot-type-social   { border-left: 2px solid var(--accent2);padding-left: .5rem; }
+
+  /* ── Execution steps ── */
+  .step {
+    display: flex;
+    gap: .9rem;
+    margin-bottom: .8rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .step-body {}
+  .step-action { font-size: .9rem; font-weight: 600; }
+  .step-meta   { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+  .step-tool   { display: inline-block; margin-left: .5rem; padding: .1rem .45rem; background: var(--card); border-radius: 4px; font-size: .7rem; border: 1px solid var(--border); color: var(--accent2); }
+
+  /* ── Insights ── */
+  .insight {
+    padding: .75rem 1rem;
+    background: var(--card);
+    border-radius: 10px;
+    margin-bottom: .65rem;
+    border-left: 3px solid var(--accent);
+  }
+  .insight-pattern { font-size: .78rem; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: .25rem; }
+  .insight-sugg    { font-size: .9rem; font-weight: 500; margin-bottom: .25rem; }
+  .insight-impact  { font-size: .78rem; }
+  .imp-high   { color: #fca5a5; }
+  .imp-medium { color: #fdba74; }
+  .imp-low    { color: #86efac; }
+
+  /* ── Tools strip ── */
+  .tools-strip { max-width: 900px; margin: 1rem auto 0; display: flex; gap: .6rem; flex-wrap: wrap; }
+  .tool-badge {
+    padding: .3rem .7rem;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-size: .75rem;
+    font-weight: 600;
+  }
+
+  .back-btn {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: .65rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: border-color .2s;
+  }
+  .back-btn:hover { border-color: var(--accent); }
+  .actions { max-width: 900px; margin: 0 auto; display: flex; gap: .75rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo-sm">Sentinal</span>
+  <div class="nav-links">
+    <a href="/">🏠 New Session</a>
+    <a href="/logs">📜 Logs</a>
+    <a href="/docs">⚙️ API</a>
+  </div>
+</div>
+
+<!-- Status banner -->
+<div class="banner {{ 'success' if source == 'llm' else 'fallback' }}">
+  <span>{{ '✅' if source == 'llm' else '⚠️' }}</span>
+  <span>{{ message }}</span>
+  {% if tools_used %}
+    <span style="margin-left: auto; color: #86efac; font-size:.8rem;">🛠️ {{ tools_used | join(', ') }}</span>
+  {% endif %}
+</div>
+
+<!-- Doomscroll Score -->
+{% set score = data.doomscroll_score %}
+{% set score_color = '#22c55e' if score <= 30 else ('#f59e0b' if score <= 60 else ('#ef4444' if score <= 80 else '#7c3aed')) %}
+{% set severity = 'Low' if score <= 30 else ('Medium' if score <= 60 else ('High' if score <= 80 else 'Critical')) %}
+{% set circumference = 251.2 %}
+{% set dash = (score / 100) * circumference %}
+
+<div class="doom-hero">
+  <div class="score-ring">
+    <svg viewBox="0 0 90 90">
+      <circle class="track" cx="45" cy="45" r="40"/>
+      <circle class="fill" cx="45" cy="45" r="40"
+        stroke="{{ score_color }}"
+        stroke-dasharray="{{ dash }} {{ circumference }}"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="score-num" style="color: {{ score_color }}">
+      {{ score }}
+      <span class="score-label">score</span>
+    </div>
+  </div>
+  <div class="doom-info">
+    <h2>{{ data.alternative_activity }}</h2>
+    <p>{{ data.motivation_message }}</p>
+  </div>
+  <div>
+    <span class="doom-type" style="background: {{ score_color }}22; border: 1px solid {{ score_color }}44; color: {{ score_color }}">
+      {{ severity }} Risk
+    </span>
+  </div>
+</div>
+
+<!-- Tools strip -->
+{% if tools_used %}
+<div class="tools-strip">
+  {% for tool in tools_used %}
+  <span class="tool-badge">✅ {{ tool }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Main grid -->
+<div class="grid" style="margin-top: 1rem;">
+
+  <!-- Engagement Menu -->
+  <div class="section full">
+    <div class="section-header">
+      <span class="icon">🎯</span> Engagement Menu — Pick an Alternative
+    </div>
+    <div class="section-body" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .5rem;">
+      {% for item in data.engagement_menu %}
+      <div class="menu-item">{{ item }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tasks (Planner Agent) -->
+  <div class="section full">
+    <div class="section-header">
+      <span class="icon">🧩</span> Planner Agent — Task Breakdown
+    </div>
+    <div class="section-body">
+      {% for task in data.tasks %}
+      <div class="task">
+        <div class="task-head">
+          <span class="task-title">{{ task.title }}</span>
+          <div style="display:flex; gap: .4rem;">
+            <span class="badge-pill p-{{ task.priority | lower }}">{{ task.priority }}</span>
+            <span class="badge-pill cat-chip">{{ task.category }}</span>
+          </div>
+        </div>
+        <div class="task-meta">⏱ {{ task.duration }} — {{ task.description }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Schedule (Scheduler Agent) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="icon">📅</span> Scheduler Agent — Time Blocks
+    </div>
+    <div class="section-body">
+      <div class="timeline">
+        {% for slot in data.schedule %}
+        <div class="slot">
+          <div class="slot-{{ slot.type }} slot-body">
+            <div class="slot-time">{{ slot.time }}</div>
+            <div class="slot-act">{{ slot.activity }}</div>
+            <div class="slot-dur">{{ slot.duration }} · {{ slot.type }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Execution Steps (Execution Agent) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="icon">⚡</span> Execution Agent — Start Right Now
+    </div>
+    <div class="section-body">
+      {% for step in data.execution_steps %}
+      <div class="step">
+        <div class="step-num">{{ step.step }}</div>
+        <div class="step-body">
+          <div class="step-action">{{ step.action }}
+            {% if step.tool %}<span class="step-tool">{{ step.tool }}</span>{% endif %}
+          </div>
+          <div class="step-meta">⏱ {{ step.duration }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Reflection (Reflection Agent) -->
+  <div class="section full">
+    <div class="section-header">
+      <span class="icon">🧠</span> Reflection Agent — Behavioral Insights
+    </div>
+    <div class="section-body" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .65rem;">
+      {% for ins in data.insights %}
+      <div class="insight">
+        <div class="insight-pattern">{{ ins.pattern }}</div>
+        <div class="insight-sugg">{{ ins.suggestion }}</div>
+        <div class="insight-impact imp-{{ ins.impact | lower }}">⚡ {{ ins.impact }} Impact</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Actions -->
+<div class="actions">
+  <a href="/" class="back-btn">⬅️ Run Another Session</a>
+  <a href="/logs" class="back-btn">📜 View Session History</a>
+</div>
+
+<br><br>
+
+</body>
+</html>
